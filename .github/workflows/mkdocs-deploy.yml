@@ -65,7 +65,7 @@ jobs:
       - name: Build documentation
         run: |
           # Always build the documentation
-          poetry run mike deploy --update-alias ${{ steps.get_version.outputs.version }} latest
+          poetry run mike deploy --prefix-path --update-alias ${{ steps.get_version.outputs.version }} latest
           poetry run mike set-default latest
           poetry run mike list
 
@@ -73,7 +73,7 @@ jobs:
         if: inputs.deploy
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './site'
+          path: './.mike'
 
       - name: Deploy to GitHub Pages
         if: inputs.deploy
