@@ -73,7 +73,7 @@ jobs:
         if: inputs.deploy
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.mike'
+          path: './site'
 
       - name: Deploy to GitHub Pages
         if: inputs.deploy
