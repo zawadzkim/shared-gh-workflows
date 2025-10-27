@@ -65,7 +65,7 @@ jobs:
           echo "version=$version" >> $GITHUB_OUTPUT
           
       - name: Build and deploy documentation
-        if: inputs.deploy
+        # if: inputs.deploy
         run: |
           poetry run mike deploy --push --branch gh-pages ${{ steps.get_version.outputs.version }} latest
           poetry run mike list
