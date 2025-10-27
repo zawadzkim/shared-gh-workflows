@@ -19,10 +19,7 @@ on:
         description: 'Whether to deploy to GitHub Pages or just build'
         type: boolean
         default: false
-    secrets:
-      token:
-        required: true
-        description: 'GitHub token for deployment'
+
 
 jobs:
   docs:
@@ -81,5 +78,3 @@ jobs:
         if: inputs.deploy
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          token: ${{ secrets.token }}
