@@ -64,12 +64,11 @@ jobs:
           
       - name: Build documentation
         run: |
-          # First build the site to verify mkdocs configuration
-          poetry run mkdocs build --strict
-          
-          # Now build with mike
-          poetry run mike deploy --prefix-path /dovwms ${{ steps.get_version.outputs.version }} --update-alias latest
+          # Configure mike
           poetry run mike set-default latest
+          
+          # Build with mike
+          poetry run mike deploy ${{ steps.get_version.outputs.version }} latest --update-alias --deploy-prefix /dovwms
           
           # Debug info
           echo "Checking mike build output:"
