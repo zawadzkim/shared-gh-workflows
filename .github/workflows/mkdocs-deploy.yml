@@ -57,12 +57,7 @@ jobs:
           echo "version=$version" >> $GITHUB_OUTPUT
           
       - name: Build and deploy documentation
-        # if: inputs.deploy
+        if: inputs.deploy
         run: |
-          # Initialize gh-pages branch if it doesn't exist
-          git fetch origin gh-pages || git branch gh-pages
-          # Build and deploy with mike
-          poetry run mike deploy --push --update-aliases --branch gh-pages ${{ steps.get_version.outputs.version }} latest
-          poetry run mike set-default --push --branch gh-pages latest
-          # List versions for verification
+          poetry run mike deploy --push --branch gh-pages ${{ steps.get_version.outputs.version }} latest
           poetry run mike list
