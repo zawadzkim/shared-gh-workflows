@@ -28,11 +28,11 @@ jobs:
         working-directory: ${{ inputs.working-directory }}
     permissions:
       contents: read
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      pages: ${{ inputs.deploy && 'write' || 'none' }}
+      id-token: ${{ inputs.deploy && 'write' || 'none' }}
+    ${{ inputs.deploy && 'environment:' || '' }}
+      ${{ inputs.deploy && 'name: github-pages' || '' }}
+      ${{ inputs.deploy && format('url: {0}', steps.deployment.outputs.page_url) || '' }}
     
     steps:
       - uses: actions/checkout@v4
