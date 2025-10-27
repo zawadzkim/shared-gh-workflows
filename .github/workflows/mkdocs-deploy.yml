@@ -65,7 +65,7 @@ jobs:
       - name: Build documentation
         run: |
           # Always build the documentation
-          poetry run mike deploy ${{ steps.get_version.outputs.version }} latest
+          poetry run mike deploy --update-alias ${{ steps.get_version.outputs.version }} latest
           poetry run mike set-default latest
           poetry run mike list
 
