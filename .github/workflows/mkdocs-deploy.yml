@@ -64,29 +64,25 @@ jobs:
           
       - name: Build documentation
         run: |
-          # Configure mike
-          poetry run mike set-default latest
+          # Build the site first
+          poetry run mkdocs build
           
-          # Build with mike
-          poetry run mike deploy ${{ steps.get_version.outputs.version }} latest --update-alias --deploy-prefix /dovwms
+          # Configure and build with mike
+          poetry run mike deploy --branch gh-pages ${{ steps.get_version.outputs.version }} latest --update-alias
+          poetry run mike set-default --branch gh-pages latest
           
           # Debug info
-          echo "Checking mike build output:"
-          ls -la
-          if [ -d ".mike" ]; then
-            echo "Contents of .mike directory:"
-            ls -la .mike
-          else
-            echo ".mike directory not found, checking site directory:"
-            ls -la site
-          fi
-          poetry run mike list
+          echo "Checking site output:"
+          ls -la site
+          
+          # List versions
+          poetry run mike list --branch gh-pages
 
       - name: Upload GitHub Pages artifact
         if: inputs.deploy
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './.mike'
+          path: './site'
 
       - name: Deploy to GitHub Pages
         if: inputs.deploy
