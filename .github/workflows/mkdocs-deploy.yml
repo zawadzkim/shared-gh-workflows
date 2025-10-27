@@ -64,9 +64,23 @@ jobs:
           
       - name: Build documentation
         run: |
-          # Always build the documentation
-          poetry run mike deploy --update-alias ${{ steps.get_version.outputs.version }} latest
+          # First build the site to verify mkdocs configuration
+          poetry run mkdocs build --strict
+          
+          # Now build with mike
+          poetry run mike deploy --prefix-path /dovwms ${{ steps.get_version.outputs.version }} --update-alias latest
           poetry run mike set-default latest
+          
+          # Debug info
+          echo "Checking mike build output:"
+          ls -la
+          if [ -d ".mike" ]; then
+            echo "Contents of .mike directory:"
+            ls -la .mike
+          else
+            echo ".mike directory not found, checking site directory:"
+            ls -la site
+          fi
           poetry run mike list
 
       - name: Upload GitHub Pages artifact
