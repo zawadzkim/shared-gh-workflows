@@ -26,6 +26,13 @@ jobs:
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     
     steps:
       - uses: actions/checkout@v4
@@ -58,9 +65,3 @@ jobs:
         if: inputs.deploy
         id: deployment
         uses: actions/deploy-pages@v4
-        permissions:
-          pages: write
-          id-token: write
-        environment:
-          name: github-pages
-          url: ${{ steps.deployment.outputs.page_url }}
