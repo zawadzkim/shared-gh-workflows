@@ -62,17 +62,18 @@ jobs:
           version=$(poetry version -s)
           echo "version=$version" >> $GITHUB_OUTPUT
           
-      - name: Build and deploy documentation
-        if: inputs.deploy
+      - name: Build documentation
         run: |
-          poetry run mike deploy --push --branch gh-pages ${{ steps.get_version.outputs.version }} latest
+          # Always build the documentation
+          poetry run mike deploy --no-push ${{ steps.get_version.outputs.version }} latest
+          poetry run mike set-default --no-push latest
           poetry run mike list
 
       - name: Upload GitHub Pages artifact
         if: inputs.deploy
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'site'
+          path: '.mike'
 
       - name: Deploy to GitHub Pages
         if: inputs.deploy
