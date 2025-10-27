@@ -7,6 +7,10 @@ on:
         description: 'Directory containing the Python project'
         type: string
         default: '.'
+      publish:
+        description: 'Whether to publish to PyPI'
+        type: boolean
+        default: false
     secrets:
       PYPI_TOKEN:
         description: 'PyPI API token for publishing'
@@ -74,7 +78,11 @@ jobs:
           prerelease: false
           generate_release_notes: true
 
-      - name: Build and publish to PyPI
-        run: |
-          poetry build
-          poetry publish
+      - name: Build package
+        run: poetry build
+
+      - name: Publish to PyPI
+        if: inputs.publish
+        env:
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
+        run: poetry publish
