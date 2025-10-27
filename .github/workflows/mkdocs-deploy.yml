@@ -21,14 +21,18 @@ on:
         default: false
 
 jobs:
-  build:
+  docs:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Important: fetch all history for mike
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -42,7 +46,6 @@ jobs:
         run: poetry install ${{ inputs.poetry-install-args }}
       
       - name: Configure Git
-        if: inputs.deploy
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@github.com"
@@ -56,39 +59,14 @@ jobs:
       - name: Build and deploy documentation
         if: inputs.deploy
         run: |
+          # Initialize gh-pages branch if it doesn't exist
+          git fetch origin gh-pages || git branch gh-pages
+          # Deploy the new version and update aliases
           poetry run mike deploy --push --update-aliases ${{ steps.get_version.outputs.version }} latest
           poetry run mike set-default --push latest
         
       - name: Build documentation (no deploy)
         if: "!inputs.deploy"
-        run: poetry run mike list
-      
-      - name: Upload Pages artifact
-        if: inputs.deploy
-        uses: actions/upload-pages-artifact@v4
-        with:
-          path: ${{ inputs.working-directory }}/site
-
-      - name: Upload build artifact for debugging
-        uses: actions/upload-artifact@v4
-        with:
-          name: documentation
-          path: ${{ inputs.working-directory }}/site
-          retention-days: 1
-
-  deploy:
-    needs: build
-    if: inputs.deploy
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-      contents: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    
-    steps:      
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+        run: |
+          poetry run mkdocs build --clean
+          poetry run mike list
