@@ -48,7 +48,13 @@ jobs:
         if: inputs.deploy
         uses: actions/configure-pages@v4
       
-      - name: Upload artifact
+      - name: Upload Pages artifact
+        if: inputs.deploy
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: ${{ inputs.working-directory }}/site
+
+      - name: Upload build artifact for debugging
         uses: actions/upload-artifact@v4
         with:
           name: documentation
@@ -66,15 +72,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     
-    steps:
-      - name: Download build artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: documentation
-          path: site
-      
+    steps:      
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-        with:
-          path: site
