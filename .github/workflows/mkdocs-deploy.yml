@@ -21,18 +21,11 @@ on:
         default: false
 
 jobs:
-  docs:
+  build:
     runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ${{ inputs.working-directory }}
-    permissions:
-      contents: read
-      pages: ${{ inputs.deploy && 'write' || 'none' }}
-      id-token: ${{ inputs.deploy && 'write' || 'none' }}
-    ${{ inputs.deploy && 'environment:' || '' }}
-      ${{ inputs.deploy && 'name: github-pages' || '' }}
-      ${{ inputs.deploy && format('url: {0}', steps.deployment.outputs.page_url) || '' }}
     
     steps:
       - uses: actions/checkout@v4
@@ -61,7 +54,39 @@ jobs:
         with:
           path: ${{ inputs.working-directory }}/site
       
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: documentation
+          path: ${{ inputs.working-directory }}/site
+          retention-days: 1
+
+  deploy:
+    needs: build
+    if: inputs.deploy
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    
+    steps:
+      - name: Download build artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: documentation
+          path: site
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+      
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      
       - name: Deploy to GitHub Pages
-        if: inputs.deploy
         id: deployment
         uses: actions/deploy-pages@v4
