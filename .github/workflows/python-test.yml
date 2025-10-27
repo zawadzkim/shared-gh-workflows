@@ -44,6 +44,4 @@ jobs:
         run: poetry run mypy
         
       - name: Lint
-        run: |
-          poetry run ruff check .
-          poetry run ruff format --check .
+        run: make check

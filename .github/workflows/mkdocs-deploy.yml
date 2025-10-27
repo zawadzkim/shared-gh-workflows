@@ -32,7 +32,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Important: fetch all history for mike
+          fetch-depth: 0
       
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -66,9 +66,4 @@ jobs:
           poetry run mike set-default --push --branch gh-pages latest
           # List versions for verification
           poetry run mike list
-        
-      - name: Build documentation (no deploy)
-        if: "!inputs.deploy"
-        run: |
-          poetry run mkdocs build --clean
-          poetry run mike list
+          
