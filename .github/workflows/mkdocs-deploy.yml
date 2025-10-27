@@ -61,3 +61,14 @@ jobs:
         run: |
           poetry run mike deploy --push --branch gh-pages ${{ steps.get_version.outputs.version }} latest
           poetry run mike list
+
+      - name: Upload GitHub Pages artifact
+        if: inputs.deploy == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: 'site'
+
+      - name: Deploy to GitHub Pages
+        if: inputs.deploy == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4
