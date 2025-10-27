@@ -1,0 +1,49 @@
+name: Reusable Python Tests
+
+on:
+  workflow_call:
+    inputs:
+      python-version:
+        description: 'Python version to use'
+        type: string
+        default: '3.11'
+      working-directory:
+        description: 'Directory containing the Python project'
+        type: string
+        default: '.'
+      poetry-install-args:
+        description: 'Additional arguments for poetry install'
+        type: string
+        default: '--with dev'
+    
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python ${{ inputs.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ inputs.python-version }}
+          
+      - name: Install Poetry
+        run: curl -sSL https://install.python-poetry.org | python3 -
+        
+      - name: Install dependencies
+        run: poetry install ${{ inputs.poetry-install-args }}
+        
+      - name: Run tests
+        run: poetry run pytest
+        
+      - name: Type checking
+        run: poetry run mypy
+        
+      - name: Lint
+        run: |
+          poetry run ruff check .
+          poetry run ruff format --check .
