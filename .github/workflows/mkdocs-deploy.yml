@@ -41,12 +41,27 @@ jobs:
       - name: Install dependencies
         run: poetry install ${{ inputs.poetry-install-args }}
       
-      - name: Build site
-        run: poetry run mkdocs build
-        
-      - name: Setup Pages
+      - name: Configure Git
         if: inputs.deploy
-        uses: actions/configure-pages@v4
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+
+      - name: Get version
+        id: get_version
+        run: |
+          version=$(poetry version -s)
+          echo "version=$version" >> $GITHUB_OUTPUT
+          
+      - name: Build and deploy documentation
+        if: inputs.deploy
+        run: |
+          poetry run mike deploy --push --update-aliases ${{ steps.get_version.outputs.version }} latest
+          poetry run mike set-default --push latest
+        
+      - name: Build documentation (no deploy)
+        if: "!inputs.deploy"
+        run: poetry run mike list
       
       - name: Upload Pages artifact
         if: inputs.deploy
@@ -68,6 +83,7 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      contents: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
