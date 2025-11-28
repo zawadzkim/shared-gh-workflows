@@ -35,10 +35,25 @@ on:
         description: 'Skip deployment if version already exists'
         type: boolean
         default: true
+      publish-conda-forge:
+        description: 'Whether to create conda-forge update PR'
+        type: boolean
+        default: false
+      conda-forge-feedstock:
+        description: 'conda-forge feedstock repository name (e.g., "simplesoilprofile-feedstock")'
+        type: string
+        default: ''
+      conda-forge-branch:
+        description: 'Branch name for conda-forge PR'
+        type: string
+        default: 'auto-update'
     secrets:
       PYPI_TOKEN:
         description: 'PyPI API token for publishing'
         required: true
+      CONDA_FORGE_TOKEN:
+        description: 'GitHub token for conda-forge feedstock access'
+        required: false
 
 jobs:
   check-version:
@@ -319,3 +334,41 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  publish-conda-forge:
+    needs: [check-version, create-release, publish-pypi]
+    if: needs.create-release.outputs.release-created == 'true' && needs.publish-pypi.outputs.published == 'true' && inputs.publish-conda-forge
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ${{ inputs.working-directory }}
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.CONDA_FORGE_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install conda-forge update dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install requests pyyaml
+
+      - name: Create conda-forge update PR
+        env:
+          GITHUB_TOKEN: ${{ secrets.CONDA_FORGE_TOKEN || secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.check-version.outputs.version }}
+          FEEDSTOCK_REPO: ${{ inputs.conda-forge-feedstock }}
+          BRANCH_NAME: ${{ inputs.conda-forge-branch }}-v${{ needs.check-version.outputs.version }}
+        run: |
+          python scripts/update_conda_forge.py \
+            --package-name "${{ github.event.repository.name }}" \
+            --version "$VERSION" \
+            --feedstock-repo "$FEEDSTOCK_REPO" \
+            --branch-name "$BRANCH_NAME" \
+            --verbose
