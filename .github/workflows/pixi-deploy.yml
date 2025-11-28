@@ -112,7 +112,7 @@ jobs:
       working-directory: ${{ inputs.working-directory }}
       environment: ${{ inputs.environment }}
       coverage: true
-      upload-artifacts: true
+      upload-artifacts: false
 
   build-package:
     needs: check-version
