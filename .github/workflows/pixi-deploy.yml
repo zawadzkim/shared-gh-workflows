@@ -91,7 +91,7 @@ jobs:
   test:
     needs: check-version
     if: needs.check-version.outputs.tag-exists != 'true'
-    uses: ./.github/workflows/pixi-test.yml
+    uses: zawadzkim/shared-gh-workflows/.github/workflows/pixi-test.yml@pixi
     with:
       pixi-version: ${{ inputs.pixi-version }}
       working-directory: ${{ inputs.working-directory }}
