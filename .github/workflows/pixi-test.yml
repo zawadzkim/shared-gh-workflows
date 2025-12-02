@@ -22,7 +22,7 @@ on:
       lint-command:
         description: 'Command to run linting'
         type: string
-        default: 'ruff check .'
+        default: 'lint'
       coverage:
         description: 'Whether to run with coverage'
         type: boolean
