@@ -298,7 +298,7 @@ jobs:
       - name: Upload to GitHub Pages
         uses: actions/upload-pages-artifact@v4
         with:
-          path: docs-temp/${{ needs.build-docs.outputs.artifact-name }}
+          path: docs-temp
 
       - name: Deploy to GitHub Pages
         id: deployment
